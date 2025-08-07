@@ -16,7 +16,7 @@
             font-family: 'Dancing Script', cursive;
             background: linear-gradient(135deg, #ffeef8 0%, #f0e6ff 50%, #ffe6f2 100%);
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden; /* Changed to hidden to prevent scrollbars from new scene */
             position: relative;
         }
 
@@ -73,6 +73,99 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* --- NEW: Scene 0: Welcome Door --- */
+        #scene0 {
+            /* Make it a fullscreen overlay */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            max-width: none; /* Override max-width from .scene */
+            background: linear-gradient(135deg, #2c0a37 0%, #5d2e6d 50%, #2c0a37 100%);
+            display: flex; /* This will be applied because ID has higher specificity */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 1s ease-in-out;
+        }
+
+        #scene0.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .welcome-heading {
+            font-size: clamp(2.5rem, 8vw, 3.5rem); /* Responsive font size */
+            color: #f0e6ff;
+            margin-bottom: 50px;
+            text-align: center;
+            padding: 0 20px;
+            text-shadow: 0 0 10px #f0e6ff, 0 0 20px #dda0dd, 0 0 30px #ff69b4;
+            animation: fadeIn 2s ease-in-out;
+            transition: opacity 0.5s ease;
+        }
+
+        .door-container {
+            perspective: 1200px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .door-container:hover .door-panel {
+            transform: rotateY(-15deg);
+        }
+
+        .door-panel {
+            width: 120px;
+            height: 200px;
+            background: linear-gradient(to right, #654321, #8B4513);
+            border: 5px solid #50331b;
+            border-radius: 10px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            transform-origin: left;
+            box-shadow: inset -5px 0 15px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .door-panel.opened {
+            transform: rotateY(-140deg);
+        }
+
+        .door-knob {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(circle, #ffe77a, #ffd700);
+            border-radius: 50%;
+            box-shadow: 0 0 5px #DAA520;
+        }
+
+        .surprise-text {
+            position: absolute;
+            font-size: clamp(3rem, 12vw, 5rem);
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 20px #ff69b4, 0 0 40px #ff1493, 0 0 60px #fff;
+            opacity: 0;
+            transform: scale(0.5) rotate(-5deg);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none; /* Can't be clicked */
+        }
+
+        .surprise-text.show {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+
+        /* --- END NEW CSS --- */
+
 
         /* Scene 1: Cake with Candles */
         .cake-container {
@@ -532,9 +625,20 @@
     <div class="particles" id="particles"></div>
 
     <div class="container">
+        <!-- Scene 0: Welcome Door (NEW) -->
+        <div class="scene active" id="scene0">
+            <h1 class="welcome-heading">Come here, Gul-e-Mahi…</h1>
+            <div class="door-container" onclick="openDoor()">
+                <div class="door-panel">
+                    <div class="door-knob"></div>
+                </div>
+            </div>
+            <div id="surpriseText" class="surprise-text">Surprise! 🎉</div>
+        </div>
+
         <!-- Scene 1: Cake with Candles -->
-        <div class="scene active" id="scene1">
-            <h1 style="font-size: 32px; color: #ff1493; margin-bottom: 30px;">🎂 Make a Wish, GUL_E_MAHI! 🎂</h1>
+        <div class="scene" id="scene1"> <!-- 'active' class removed -->
+            <h1 style="font-size: 32px; color: #ff1493; margin-bottom: 30px;">🎂 Make a Wish, Gul-e-Mahi! 🎂</h1>
             
             <div class="cake-container">
                 <div class="cake">
@@ -570,15 +674,9 @@
             
             <div class="cut-cake">
                 <div class="cake-cut">
-                    <div class="cake-layer layer-3">
-                        <div class="chocolate-drip"></div>
-                    </div>
-                    <div class="cake-layer layer-2">
-                        <div class="chocolate-drip"></div>
-                    </div>
-                    <div class="cake-layer layer-1">
-                        <div class="chocolate-drip"></div>
-                    </div>
+                    <div class="cake-layer layer-3"><div class="chocolate-drip"></div></div>
+                    <div class="cake-layer layer-2"><div class="chocolate-drip"></div></div>
+                    <div class="cake-layer layer-1"><div class="chocolate-drip"></div></div>
                     <div class="knife">
                         <div class="knife-blade"></div>
                         <div class="knife-handle"></div>
@@ -588,48 +686,24 @@
             </div>
             
             <div class="plates-container">
-                <div class="plate" draggable="true" data-member="mom">
-                    <div class="cake-slice"></div>
-                    <div class="plate-name">Mom</div>
-                </div>
-                <div class="plate" draggable="true" data-member="dad">
-                    <div class="cake-slice"></div>
-                    <div class="plate-name">Dad</div>
-                </div>
-                <div class="plate" draggable="true" data-member="sisters">
-                    <div class="cake-slice"></div>
-                    <div class="plate-name">Sisters</div>
-                </div>
-                <div class="plate" draggable="true" data-member="me">
-                    <div class="cake-slice"></div>
-                    <div class="plate-name">Me</div>
-                </div>
+                <div class="plate" draggable="true" data-member="mom"><div class="cake-slice"></div><div class="plate-name">Mom</div></div>
+                <div class="plate" draggable="true" data-member="dad"><div class="cake-slice"></div><div class="plate-name">Dad</div></div>
+                <div class="plate" draggable="true" data-member="sisters"><div class="cake-slice"></div><div class="plate-name">Sisters</div></div>
+                <div class="plate" draggable="true" data-member="me"><div class="cake-slice"></div><div class="plate-name">Me</div></div>
             </div>
             
             <div class="family-members">
-                <div class="family-member" data-member="mom">
-                    <div class="member-emoji">👩</div>
-                    <div class="member-name">Mom</div>
-                </div>
-                <div class="family-member" data-member="dad">
-                    <div class="member-emoji">👨</div>
-                    <div class="member-name">Dad</div>
-                </div>
-                <div class="family-member" data-member="sisters">
-                    <div class="member-emoji">👭</div>
-                    <div class="member-name">Sisters</div>
-                </div>
-                <div class="family-member" data-member="me">
-                    <div class="member-emoji">🤵</div>
-                    <div class="member-name">Me</div>
-                </div>
+                <div class="family-member" data-member="mom"><div class="member-emoji">👩</div><div class="member-name">Mom</div></div>
+                <div class="family-member" data-member="dad"><div class="member-emoji">👨</div><div class="member-name">Dad</div></div>
+                <div class="family-member" data-member="sisters"><div class="member-emoji">👭</div><div class="member-name">Sisters</div></div>
+                <div class="family-member" data-member="me"><div class="member-emoji">🤵</div><div class="member-name">Me</div></div>
             </div>
         </div>
 
         <!-- Scene 3: Final Message -->
         <div class="scene" id="scene3">
             <div class="final-message">
-                <h1 class="final-title">Happy Birthday, GUL_E_MAHI (Halay Khan)</h1>
+                <h1 class="final-title">Happy Birthday, Gul-e-Mahi (Halay Khan)</h1>
                 <div class="glowing-heart">💖</div>
                 <p style="font-size: 20px; color: #8b008b; line-height: 1.6;">
                     You bring magic to every moment.<br>
@@ -652,6 +726,42 @@
     </div>
 
     <script>
+        // --- NEW: SCRIPT FOR OPENING SCENE ---
+        function openDoor() {
+            const doorPanel = document.querySelector('.door-panel');
+            const doorContainer = document.querySelector('.door-container');
+            const welcomeHeading = document.querySelector('.welcome-heading');
+            const surpriseText = document.getElementById('surpriseText');
+            const scene0 = document.getElementById('scene0');
+            const scene1 = document.getElementById('scene1');
+
+            // Prevent multiple clicks
+            doorContainer.style.pointerEvents = 'none';
+
+            // 1. Open the door and fade out the heading
+            doorPanel.classList.add('opened');
+            welcomeHeading.style.opacity = '0';
+            
+            // 2. Show the "Surprise!" message after a short delay
+            setTimeout(() => {
+                surpriseText.classList.add('show');
+            }, 600); // Timed to appear as the door swings open
+
+            // 3. Start fading out the entire welcome scene
+            setTimeout(() => {
+                scene0.classList.add('fade-out');
+            }, 2000); // Keep surprise message visible for a bit
+
+            // 4. After the fade-out, hide scene0 and show scene1
+            setTimeout(() => {
+                scene0.classList.remove('active');
+                scene0.style.display = 'none'; // Ensure it's fully hidden
+                scene1.classList.add('active');
+            }, 3000); // Must be longer than the fade-out duration (1s)
+        }
+
+        // --- END NEW SCRIPT ---
+
         // Messages for each family member
         const messages = {
             mom: "Mom, I will always love you. You are my sunshine and dil ka sukoon. Love you beta 🌞❤️",
@@ -754,12 +864,10 @@
                         deliveredPlates.add(plateType);
                         showMessage(memberType);
                         
-                        // Hide the delivered plate
                         const deliveredPlate = document.querySelector(`.plate[data-member="${plateType}"]`);
                         deliveredPlate.style.opacity = '0.3';
                         deliveredPlate.draggable = false;
                         
-                        // Add delivered indicator
                         member.style.background = 'linear-gradient(45deg, #98fb98, #90ee90)';
                         member.innerHTML += '<div style="position: absolute; top: -10px; right: -10px; background: #ff69b4; color: white; border-radius: 50%; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; font-size: 14px;">✓</div>';
                         
@@ -781,7 +889,6 @@
             message.textContent = messages[memberType];
             popup.style.display = 'flex';
             
-            // Create heart particles
             createHeartParticles();
         }
 
@@ -838,46 +945,15 @@
             }, 5000);
         }
 
-        // Start again function
+        // Start again function (reloads the page to reset everything)
         function startAgain() {
-            // Reset all scenes
-            document.querySelectorAll('.scene').forEach(scene => {
-                scene.classList.remove('active');
-            });
-            document.getElementById('scene1').classList.add('active');
-            
-            // Reset candles
-            document.querySelectorAll('.flame').forEach(flame => {
-                flame.classList.remove('blown-out');
-            });
-            
-            // Reset plates
-            deliveredPlates.clear();
-            document.querySelectorAll('.plate').forEach(plate => {
-                plate.style.opacity = '1';
-                plate.draggable = true;
-            });
-            
-            // Reset family members
-            document.querySelectorAll('.family-member').forEach(member => {
-                member.style.background = 'linear-gradient(45deg, #e6e6fa, #f0e6ff)';
-                const checkmark = member.querySelector('div[style*="position: absolute"]');
-                if (checkmark) {
-                    checkmark.remove();
-                }
-            });
-            
-            // Remove any existing confetti
-            const existingConfetti = document.querySelector('.confetti');
-            if (existingConfetti) {
-                existingConfetti.remove();
-            }
+            location.reload();
         }
 
         // Initialize the app
         createFloatingHearts();
         
-        // Add touch support for mobile
+        // Add basic touch support for mobile drag-drop simulation
         document.addEventListener('touchstart', function(e) {
             if (e.target.classList.contains('plate')) {
                 e.target.style.transform = 'scale(1.1)';
@@ -890,5 +966,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96b5c5a0f01de1d5',t:'MTc1NDU1OTIwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
